@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akatl Startpage</title>
+  <meta name="description" content="Personal dark cyberpunk browser startpage with live 24h clock, week weather forecast with rain probability, AI bookmarks, search, and research news.">
+  <meta property="og:title" content="Akatl Startpage">
+  <meta property="og:description" content="Personal dark cyberpunk browser startpage with live 24h clock, week weather forecast with rain probability, AI bookmarks, search, and research news.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0a0a0a radial-gradient(ellipse at center, #1a0505 0%, #0a0a0a 70%);
+      color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      display: grid;
+      grid-template-columns: 1.15fr 2fr 1.15fr;
+      grid-template-areas:
+        "info search terminal"
+        "info bookmarks news";
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: rgba(15, 15, 15, 0.88);
+      border: 1px solid rgba(204, 0, 0, 0.25);
+      border-left: 3px solid #cc0000;
+      border-radius: 3px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #888888;
+      margin-bottom: 16px;
+    }
+
+    /* Panel Left: TIME, GREETING & WEATHER (Grid Area: info) */
+    .panel-info {
+      grid-area: info;
+      gap: 16px;
+      justify-content: flex-start;
+    }
+
+    .greeting-section {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 12px;
+    }
+
+    .greeting-text {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #888888;
+      font-weight: 500;
+    }
+
+    .greeting-user {
+      font-size: 26px;
+      font-weight: 800;
+      color: #cc0000;
+      letter-spacing: 4px;
+      margin-top: 4px;
+      text-shadow: 0 0 12px rgba(204, 0, 0, 0.35);
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #888888;
+      text-transform: uppercase;
+      font-family: inherit;
+    }
+
+    .clock-display {
+      font-family: "Courier New", Courier, "Fira Code", monospace;
+      font-size: 34px;
+      font-weight: bold;
+      color: #e8e8e8;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: baseline;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .clock-colon {
+      color: #cc0000;
+      margin: 0 4px;
+      text-shadow: 0 0 6px rgba(204, 0, 0, 0.5);
+    }
+
+    .date-display {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 14px;
+      color: #e8e8e8;
+      letter-spacing: 2px;
+    }
+
+    /* Weather Section */
+    .weather-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .weather-current {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+    }
+
+    .weather-current-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .weather-current-icon {
+      font-size: 24px;
+    }
+
+    .weather-current-temp {
+      font-family: "Courier New", Courier, monospace;
+      font-weight: bold;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .weather-current-desc {
+      color: #aaaaaa;
+      font-size: 12px;
+    }
+
+    .weather-current-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .weather-rain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      color: #64b5f6;
+      background: rgba(33, 150, 243, 0.1);
+      padding: 2px 6px;
+      border-radius: 2px;
+      border: 1px solid rgba(33, 150, 243, 0.25);
+    }
+
+    .weather-week-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #777777;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .weather-week-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .weather-day-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 2px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    /* Highlight Today */
+    .weather-day-row.is-today {
+      background: rgba(204, 0, 0, 0.14);
+      border: 1px solid rgba(204, 0, 0, 0.55);
+      border-left: 3px solid #cc0000;
+      box-shadow: 0 0 10px rgba(204, 0, 0, 0.2);
+    }
+
+    .weather-day-row.is-today .weather-day-name {
+      color: #ff3333;
+      font-weight: bold;
+    }
+
+    .weather-day-name {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #888888;
+      width: 44px;
+    }
+
+    .weather-day-icon {
+      font-size: 13px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .weather-day-desc {
+      flex: 1;
+      font-size: 11px;
+      color: #999999;
+      padding: 0 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .weather-day-row.is-today .weather-day-desc {
+      color: #e8e8e8;
+    }
+
+    .weather-day-rain {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 10px;
+      color: #64b5f6;
+      margin-right: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .weather-day-temp {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .temp-max {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .temp-sep {
+      color: #555555;
+      margin: 0 2px;
+    }
+
+    .temp-min {
+      color: #777777;
+    }
+
+    .weather-status {
+      font-size: 12px;
+      color: #888888;
+      padding: 8px 0;
+    }
+
+    /* Panel 2: SEARCH (Grid Area: search) */
+    .panel-search {
+      grid-area: search;
+      justify-content: center;
+      min-height: 140px;
+    }
+
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-input {
+      width: 100%;
+      background: #0f0f0f;
+      border: 1px solid rgba(204, 0, 0, 0.3);
+      border-radius: 3px;
+      color: #e8e8e8;
+      font-size: 15px;
+      padding: 13px 44px 13px 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      border-color: #cc0000;
+      box-shadow: 0 0 12px rgba(204, 0, 0, 0.4);
+    }
+
+    .search-input::placeholder {
+      color: #555555;
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #888888;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .search-btn:hover {
+      color: #ff3333;
+    }
+
+    .search-hint {
+      font-size: 11px;
+      color: #666666;
+      letter-spacing: 1px;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    /* Panel 3: MAIN / TERMINAL (Grid Area: terminal) */
+    .panel-terminal {
+      grid-area: terminal;
+      font-family: "Courier New", Courier, monospace;
+      min-height: 140px;
+    }
+
+    .terminal-body {
+      background: #0b0b0b;
+      border: 1px solid #1a1a1a;
+      border-radius: 2px;
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .terminal-welcome {
+      color: #888888;
+      font-size: 12px;
+    }
+
+    .terminal-prompt-line {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .terminal-user {
+      color: #cc0000;
+      font-weight: bold;
+    }
+
+    .terminal-host {
+      color: #888888;
+    }
+
+    .terminal-path {
+      color: #e8e8e8;
+    }
+
+    .terminal-cursor {
+      display: inline-block;
+      color: #cc0000;
+      animation: cursor-blink 1s steps(1) infinite;
+      margin-left: 2px;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    @keyframes cursor-blink {
+      0%, 49% {
+        opacity: 1;
+      }
+      50%, 100% {
+        opacity: 0;
+      }
+    }
+
+    /* Panel 4: BOOKMARKS (Grid Area: bookmarks) */
+    .panel-bookmarks {
+      grid-area: bookmarks;
+      flex: 1;
+    }
+
+    .bookmarks-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .category-column {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .category-header {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #888888;
+      text-transform: uppercase;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(204, 0, 0, 0.35);
+      padding-bottom: 6px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-badge {
+      background: #cc0000;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 2px;
+      letter-spacing: 1px;
+    }
+
+    .bookmarks-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bookmark-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #e8e8e8;
+      font-size: 13px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+      transition: all 0.15s ease;
+    }
+
+    .bookmark-num {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 10px;
+      color: #555555;
+      width: 14px;
+    }
+
+    .bookmark-abbr {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      color: #888888;
+      width: 22px;
+      text-align: right;
+    }
+
+    .bookmark-arrow {
+      color: #555555;
+      font-size: 11px;
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    .bookmark-name {
+      color: #e8e8e8;
+      font-size: 12.5px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: color 0.15s;
+    }
+
+    .bookmark-link:hover {
+      background: rgba(204, 0, 0, 0.08);
+      border-color: rgba(204, 0, 0, 0.4);
+      transform: translateX(3px);
+    }
+
+    .bookmark-link:hover .bookmark-name,
+    .bookmark-link:hover {
+      color: #ff3333;
+    }
+
+    .bookmark-link:hover .bookmark-arrow {
+      color: #cc0000;
+      transform: translateX(2px);
+    }
+
+    .bookmark-link:hover .bookmark-abbr {
+      color: #bbbbbb;
+    }
+
+    /* Panel 5: NEWS / LINKS (Grid Area: news) */
+    .panel-news {
+      grid-area: news;
+      justify-content: flex-start;
+    }
+
+    .news-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .news-link {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-decoration: none;
+      color: #e8e8e8;
+      padding: 11px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s, padding-left 0.2s;
+    }
+
+    .news-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .news-title {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .news-tag {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      color: #cc0000;
+    }
+
+    .news-desc {
+      font-size: 11px;
+      color: #777777;
+      letter-spacing: 0.4px;
+      line-height: 1.4;
+    }
+
+    .news-link:hover {
+      color: #ff3333;
+      border-color: rgba(204, 0, 0, 0.5);
+      background: rgba(204, 0, 0, 0.06);
+      padding-left: 16px;
+    }
+
+    .news-link:hover .news-title {
+      color: #ff3333;
+    }
+
+    .news-link:hover .news-desc {
+      color: #aaaaaa;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+        grid-template-areas: none;
+      }
+
+      .panel-search {
+        order: 1;
+      }
+
+      .panel-info {
+        order: 2;
+      }
+
+      .panel-bookmarks {
+        order: 3;
+      }
+
+      .panel-terminal {
+        order: 4;
+      }
+
+      .panel-news {
+        order: 5;
+      }
+
+      .bookmarks-columns {
+        grid-template-columns: 1fr;
+      }
+
+      .clock-display {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <!-- 1. TIME, GREETING & WEATHER (Spans Left Column) -->
+    <section class="panel panel-info">
+      <div class="greeting-section">
+        <div class="greeting-text" id="greeting-text">GOOD DAY</div>
+        <div class="greeting-user">AKATL</div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">TIME</span>
+        <div class="clock-display" id="clock-display">
+          <span id="clock-hh">00</span><span class="clock-colon">:</span><span id="clock-mm">00</span><span class="clock-colon">:</span><span id="clock-ss">00</span>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">DATE</span>
+        <div class="date-display" id="date-display">00 . 00 . 0000</div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">WEATHER &amp; PRECIPITATION</span>
+        <div class="weather-container" id="weather-container">
+          <div class="weather-status">Fetching week forecast &amp; rain probability...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SEARCH (top-center) -->
+    <section class="panel panel-search">
+      <h2 class="panel-title">SEARCH</h2>
+      <form class="search-form" id="search-form" action="https://www.google.com/search" method="GET">
+        <div class="search-input-wrapper">
+          <input 
+            type="text" 
+            name="q" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="Type search query and press Enter..." 
+            autocomplete="off" 
+            autofocus
+            aria-label="Google Search"
+          >
+          <button type="submit" class="search-btn" aria-label="Submit Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="search-hint">ENGINE: GOOGLE [ENTER ↵ TO EXECUTE]</div>
+      </form>
+    </section>
+
+    <!-- 3. MAIN / TERMINAL (top-right) -->
+    <section class="panel panel-terminal">
+      <h2 class="panel-title">MAIN</h2>
+      <div class="terminal-body">
+        <div class="terminal-welcome">Welcome Akatl</div>
+        <div class="terminal-prompt-line">
+          <span class="terminal-user">Akatl</span><span class="terminal-host">@homepage</span><span class="terminal-path">:~$</span>
+          <span class="terminal-cursor">█</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. BOOKMARKS (center: Favorites + AI Columns) -->
+    <section class="panel panel-bookmarks">
+      <h2 class="panel-title">BOOKMARKS</h2>
+      <div class="bookmarks-columns">
+        <!-- Column 1: FAVORITES (youtube, gmail, protonmail, drive, calendar, spotify, reddit) -->
+        <div class="category-column">
+          <h3 class="category-header">FAVORITES</h3>
+          <ul class="bookmarks-list">
+            <!-- 1. youtube -->
+            <li>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">01</span>
+                <span class="bookmark-abbr">yt</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">youtube</span>
+              </a>
+            </li>
+            <!-- 2. gmail -->
+            <li>
+              <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">02</span>
+                <span class="bookmark-abbr">gm</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">gmail</span>
+              </a>
+            </li>
+            <!-- 3. protonmail -->
+            <li>
+              <a href="https://mail.proton.me" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">03</span>
+                <span class="bookmark-abbr">pm</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">protonmail</span>
+              </a>
+            </li>
+            <!-- 4. drive -->
+            <li>
+              <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">04</span>
+                <span class="bookmark-abbr">gd</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">drive</span>
+              </a>
+            </li>
+            <!-- 5. calendar -->
+            <li>
+              <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">05</span>
+                <span class="bookmark-abbr">gc</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">calendar</span>
+              </a>
+            </li>
+            <!-- 6. spotify -->
+            <li>
+              <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">06</span>
+                <span class="bookmark-abbr">sp</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">spotify</span>
+              </a>
+            </li>
+            <!-- 7. reddit -->
+            <li>
+              <a href="https://reddit.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">07</span>
+                <span class="bookmark-abbr">rd</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">reddit</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Column 2: AI (gemini, qwen studio, google AI studio, alilbaba cloud, chatGPT, Claude) -->
+        <div class="category-column">
+          <h3 class="category-header"><span class="ai-badge">AI</span> ARTIFICIAL INTELLIGENCE</h3>
+          <ul class="bookmarks-list">
+            <!-- 1. gemini -->
+            <li>
+              <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">01</span>
+                <span class="bookmark-abbr">ge</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">gemini</span>
+              </a>
+            </li>
+            <!-- 2. qwen studio -->
+            <li>
+              <a href="https://chat.qwenlm.ai" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">02</span>
+                <span class="bookmark-abbr">qw</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">qwen studio</span>
+              </a>
+            </li>
+            <!-- 3. google AI studio -->
+            <li>
+              <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">03</span>
+                <span class="bookmark-abbr">ai</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">google AI studio</span>
+              </a>
+            </li>
+            <!-- 4. alilbaba cloud -->
+            <li>
+              <a href="https://www.alibabacloud.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">04</span>
+                <span class="bookmark-abbr">ac</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">alibaba cloud</span>
+              </a>
+            </li>
+            <!-- 5. chatGPT -->
+            <li>
+              <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">05</span>
+                <span class="bookmark-abbr">cg</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">chatGPT</span>
+              </a>
+            </li>
+            <!-- 6. Claude -->
+            <li>
+              <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+                <span class="bookmark-num">06</span>
+                <span class="bookmark-abbr">cl</span>
+                <span class="bookmark-arrow">→</span>
+                <span class="bookmark-name">Claude</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. NEWS / LINKS (bottom-right: AI & Data Science News) -->
+    <section class="panel panel-news">
+      <h2 class="panel-title">AI &amp; DATA SCIENCE</h2>
+      <ul class="news-list">
+        <li>
+          <a href="https://huggingface.co/papers" target="_blank" rel="noopener noreferrer" class="news-link">
+            <div class="news-header">
+              <span class="news-title">HUGGING FACE PAPERS</span>
+              <span class="news-tag">↗</span>
+            </div>
+            <span class="news-desc">Daily trending research papers, benchmarks &amp; community discussions</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://arxiv.org/list/cs.AI/recent" target="_blank" rel="noopener noreferrer" class="news-link">
+            <div class="news-header">
+              <span class="news-title">ARXIV CS.AI &amp; ML</span>
+              <span class="news-tag">↗</span>
+            </div>
+            <span class="news-desc">New preprints in artificial intelligence, deep learning &amp; neural theory</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://towardsdatascience.com" target="_blank" rel="noopener noreferrer" class="news-link">
+            <div class="news-header">
+              <span class="news-title">TOWARDS DATA SCIENCE</span>
+              <span class="news-tag">↗</span>
+            </div>
+            <span class="news-desc">Applied machine learning, MLOps, LLMs &amp; mathematical guides</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.technologyreview.com/topic/artificial-intelligence/" target="_blank" rel="noopener noreferrer" class="news-link">
+            <div class="news-header">
+              <span class="news-title">MIT TECH REVIEW AI</span>
+              <span class="news-tag">↗</span>
+            </div>
+            <span class="news-desc">Deep investigative journalism and societal impact of frontier models</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // 1. Search Redirection Handler
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+
+    searchForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      if (query) {
+        window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+      }
+    });
+
+    // 2. Greeting, Clock & Date
+    const greetingEl = document.getElementById('greeting-text');
+    const clockHh = document.getElementById('clock-hh');
+    const clockMm = document.getElementById('clock-mm');
+    const clockSs = document.getElementById('clock-ss');
+    const dateEl = document.getElementById('date-display');
+
+    function updateTimeAndDate() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      // Dynamic Greeting based on hour:
+      // Morning: 5 - 11, Afternoon: 12 - 16, Evening: 17 - 21, Night: 22 - 4
+      if (hours >= 5 && hours < 12) {
+        greetingEl.textContent = 'GOOD MORNING';
+      } else if (hours >= 12 && hours < 17) {
+        greetingEl.textContent = 'GOOD AFTERNOON';
+      } else if (hours >= 17 && hours < 22) {
+        greetingEl.textContent = 'GOOD EVENING';
+      } else {
+        greetingEl.textContent = 'GOOD NIGHT';
+      }
+
+      // 24h Clock
+      clockHh.textContent = String(hours).padStart(2, '0');
+      clockMm.textContent = String(minutes).padStart(2, '0');
+      clockSs.textContent = String(seconds).padStart(2, '0');
+
+      // Date in DD . MM . YYYY format
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      dateEl.textContent = day + ' . ' + month + ' . ' + year;
+    }
+
+    updateTimeAndDate();
+    setInterval(updateTimeAndDate, 1000);
+
+    // 3. Weather Fetching with Rain Probability from Open-Meteo
+    const weatherContainer = document.getElementById('weather-container');
+
+    // WMO Weather code mapping
+    function getWmoDetails(code) {
+      switch (code) {
+        case 0:
+          return { icon: '☀️', text: 'Clear' };
+        case 1:
+          return { icon: '🌤️', text: 'Mainly Clear' };
+        case 2:
+          return { icon: '⛅', text: 'Partly Cloudy' };
+        case 3:
+          return { icon: '☁️', text: 'Overcast' };
+        case 45:
+        case 48:
+          return { icon: '🌫️', text: 'Fog' };
+        case 51:
+        case 53:
+        case 55:
+          return { icon: '🌧️', text: 'Drizzle' };
+        case 56:
+        case 57:
+          return { icon: '🌧️', text: 'Freezing Drizzle' };
+        case 61:
+        case 63:
+        case 65:
+          return { icon: '🌧️', text: 'Rain' };
+        case 66:
+        case 67:
+          return { icon: '🌧️', text: 'Freezing Rain' };
+        case 71:
+        case 73:
+        case 75:
+        case 77:
+          return { icon: '❄️', text: 'Snow' };
+        case 80:
+        case 81:
+        case 82:
+          return { icon: '🌧️', text: 'Showers' };
+        case 85:
+        case 86:
+          return { icon: '❄️', text: 'Snow Showers' };
+        case 95:
+          return { icon: '⛈️', text: 'Thunderstorm' };
+        case 96:
+        case 99:
+          return { icon: '⛈️', text: 'Hailstorm' };
+        default:
+          return { icon: '⛅', text: 'Variable' };
+      }
+    }
+
+    async function fetchWeatherForCoords(lat, lon) {
+      try {
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + 
+          encodeURIComponent(lat) + 
+          '&longitude=' + encodeURIComponent(lon) + 
+          '&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto';
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network error');
+        const data = await response.json();
+
+        if (data && data.daily && data.daily.time && data.daily.time.length > 0) {
+          const currentTemp = data.current_weather ? Math.round(data.current_weather.temperature) : Math.round(data.daily.temperature_2m_max[0]);
+          const currentCode = data.current_weather ? data.current_weather.weathercode : data.daily.weathercode[0];
+          const currentDetails = getWmoDetails(currentCode);
+          const todayRainProb = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[0] !== undefined) 
+            ? data.daily.precipitation_probability_max[0] 
+            : 0;
+
+          // Build current weather summary with Rain Probability
+          let html = '<div class="weather-current">' +
+            '<div class="weather-current-left">' +
+              '<span class="weather-current-icon">' + currentDetails.icon + '</span>' +
+              '<div>' +
+                '<div class="weather-current-temp">' + currentTemp + '°C</div>' +
+                '<div class="weather-current-desc">' + currentDetails.text + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="weather-current-stats">' +
+              '<div class="weather-rain-badge" title="Precipitation Probability">' +
+                '<span>💧</span><span>' + todayRainProb + '%</span>' +
+              '</div>' +
+              '<div class="weather-day-temp">' +
+                '<span class="temp-max">H: ' + Math.round(data.daily.temperature_2m_max[0]) + '°</span>' +
+                '<span class="temp-sep">/</span>' +
+                '<span class="temp-min">L: ' + Math.round(data.daily.temperature_2m_min[0]) + '°</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+
+          html += '<div class="weather-week-title">7-DAY FORECAST &amp; RAIN CHANCE</div>';
+          html += '<div class="weather-week-list">';
+
+          const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+          // Render all week days (up to 7 days)
+          const daysCount = Math.min(data.daily.time.length, 7);
+          for (let i = 0; i < daysCount; i++) {
+            const dateStr = data.daily.time[i];
+            const parts = dateStr.split('-');
+            const dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            const isToday = i === 0;
+            const dayLabel = isToday ? 'TODAY' : dayNames[dateObj.getDay()];
+            const maxT = Math.round(data.daily.temperature_2m_max[i]);
+            const minT = Math.round(data.daily.temperature_2m_min[i]);
+            const code = data.daily.weathercode[i];
+            const details = getWmoDetails(code);
+            const rainProb = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[i] !== undefined)
+              ? data.daily.precipitation_probability_max[i]
+              : 0;
+
+            html += '<div class="weather-day-row ' + (isToday ? 'is-today' : '') + '">' +
+              '<span class="weather-day-name">' + dayLabel + '</span>' +
+              '<span class="weather-day-icon">' + details.icon + '</span>' +
+              '<span class="weather-day-desc">' + details.text + '</span>' +
+              '<span class="weather-day-rain" title="Rain probability">💧' + rainProb + '%</span>' +
+              '<span class="weather-day-temp">' +
+                '<span class="temp-max">' + maxT + '°</span>' +
+                '<span class="temp-sep">/</span>' +
+                '<span class="temp-min">' + minT + '°</span>' +
+              '</span>' +
+            '</div>';
+          }
+
+          html += '</div>';
+          weatherContainer.innerHTML = html;
+          return;
+        }
+
+        throw new Error('Invalid format');
+      } catch (err) {
+        weatherContainer.innerHTML = '<span class="weather-status">Weather unavailable</span>';
+      }
+    }
+
+    function initWeather() {
+      const fallbackLat = 46.95;
+      const fallbackLon = 7.45; // Bern, CH
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            fetchWeatherForCoords(position.coords.latitude, position.coords.longitude);
+          },
+          function () {
+            // Geolocation denied or timed out: use fallback
+            fetchWeatherForCoords(fallbackLat, fallbackLon);
+          },
+          { timeout: 8000 }
+        );
+      } else {
+        fetchWeatherForCoords(fallbackLat, fallbackLon);
+      }
+    }
+
+    initWeather();
+    // Refresh weather every 10 minutes (600,000 ms)
+    setInterval(initWeather, 600000);
+  </script>
+</body>
+</html>
