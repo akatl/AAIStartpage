@@ -171,7 +171,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 2px;
+      gap: 3px;
     }
 
     .weather-rain-badge {
@@ -179,12 +179,39 @@
       align-items: center;
       gap: 3px;
       font-family: "Courier New", Courier, monospace;
-      font-size: 11px;
+      font-size: 10px;
       color: #64b5f6;
-      background: rgba(33, 150, 243, 0.1);
-      padding: 2px 6px;
+      background: rgba(33, 150, 243, 0.08);
+      padding: 3px 6px;
       border-radius: 2px;
-      border: 1px solid rgba(33, 150, 243, 0.25);
+      border: 1px solid rgba(33, 150, 243, 0.22);
+      white-space: nowrap;
+    }
+
+    .weather-rain-badge .p-min {
+      color: #81c784;
+    }
+
+    .weather-rain-badge .p-mean {
+      color: #64b5f6;
+      font-weight: 600;
+    }
+
+    .weather-rain-badge .p-max {
+      color: #ff8a80;
+    }
+
+    .weather-rain-badge .p-slash {
+      color: #555555;
+      margin: 0 1px;
+    }
+
+    .weather-legend {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding: 0 2px;
     }
 
     .weather-week-title {
@@ -192,7 +219,14 @@
       letter-spacing: 2px;
       color: #777777;
       text-transform: uppercase;
-      margin-top: 6px;
+    }
+
+    .rain-legend-label {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+      color: #64b5f6;
+      opacity: 0.85;
     }
 
     .weather-week-list {
@@ -258,10 +292,29 @@
       font-family: "Courier New", Courier, monospace;
       font-size: 10px;
       color: #64b5f6;
-      margin-right: 8px;
+      margin-right: 6px;
       display: inline-flex;
       align-items: center;
       gap: 2px;
+      white-space: nowrap;
+    }
+
+    .weather-day-rain .p-min {
+      color: #81c784;
+    }
+
+    .weather-day-rain .p-mean {
+      color: #64b5f6;
+      font-weight: 600;
+    }
+
+    .weather-day-rain .p-max {
+      color: #ff8a80;
+    }
+
+    .weather-day-rain .p-slash {
+      color: #555555;
+      margin: 0 1px;
     }
 
     .weather-day-temp {
@@ -1081,7 +1134,7 @@
         const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + 
           encodeURIComponent(lat) + 
           '&longitude=' + encodeURIComponent(lon) + 
-          '&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto';
+          '&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_probability_min,precipitation_probability_mean&timezone=auto';
         
         const response = await fetch(url);
         if (!response.ok) throw new Error('Network error');
@@ -1091,11 +1144,18 @@
           const currentTemp = data.current_weather ? Math.round(data.current_weather.temperature) : Math.round(data.daily.temperature_2m_max[0]);
           const currentCode = data.current_weather ? data.current_weather.weathercode : data.daily.weathercode[0];
           const currentDetails = getWmoDetails(currentCode);
-          const todayRainProb = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[0] !== undefined) 
+
+          const todayMinP = (data.daily.precipitation_probability_min && data.daily.precipitation_probability_min[0] !== undefined) 
+            ? data.daily.precipitation_probability_min[0] 
+            : 0;
+          const todayMeanP = (data.daily.precipitation_probability_mean && data.daily.precipitation_probability_mean[0] !== undefined) 
+            ? Math.round(data.daily.precipitation_probability_mean[0]) 
+            : 0;
+          const todayMaxP = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[0] !== undefined) 
             ? data.daily.precipitation_probability_max[0] 
             : 0;
 
-          // Build current weather summary with Rain Probability
+          // Build current weather summary with Rain Probability (min, mean, max)
           let html = '<div class="weather-current">' +
             '<div class="weather-current-left">' +
               '<span class="weather-current-icon">' + currentDetails.icon + '</span>' +
@@ -1105,8 +1165,13 @@
               '</div>' +
             '</div>' +
             '<div class="weather-current-stats">' +
-              '<div class="weather-rain-badge" title="Precipitation Probability">' +
-                '<span>💧</span><span>' + todayRainProb + '%</span>' +
+              '<div class="weather-rain-badge" title="Precipitation Probability (Min / Mean / Max)">' +
+                '<span>💧</span>' +
+                '<span class="p-min" title="Min">' + todayMinP + '%</span>' +
+                '<span class="p-slash">/</span>' +
+                '<span class="p-mean" title="Mean">' + todayMeanP + '%</span>' +
+                '<span class="p-slash">/</span>' +
+                '<span class="p-max" title="Max">' + todayMaxP + '%</span>' +
               '</div>' +
               '<div class="weather-day-temp">' +
                 '<span class="temp-max">H: ' + Math.round(data.daily.temperature_2m_max[0]) + '°</span>' +
@@ -1116,13 +1181,16 @@
             '</div>' +
           '</div>';
 
-          html += '<div class="weather-week-title">7-DAY FORECAST &amp; RAIN CHANCE</div>';
+          html += '<div class="weather-legend">' +
+            '<span class="weather-week-title">5-DAY FORECAST</span>' +
+            '<span class="rain-legend-label">💧 MIN / MEAN / MAX</span>' +
+          '</div>';
           html += '<div class="weather-week-list">';
 
           const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-          // Render all week days (up to 7 days)
-          const daysCount = Math.min(data.daily.time.length, 7);
+          // Render 5 days of forecast
+          const daysCount = Math.min(data.daily.time.length, 5);
           for (let i = 0; i < daysCount; i++) {
             const dateStr = data.daily.time[i];
             const parts = dateStr.split('-');
@@ -1133,7 +1201,14 @@
             const minT = Math.round(data.daily.temperature_2m_min[i]);
             const code = data.daily.weathercode[i];
             const details = getWmoDetails(code);
-            const rainProb = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[i] !== undefined)
+
+            const pMin = (data.daily.precipitation_probability_min && data.daily.precipitation_probability_min[i] !== undefined)
+              ? data.daily.precipitation_probability_min[i]
+              : 0;
+            const pMean = (data.daily.precipitation_probability_mean && data.daily.precipitation_probability_mean[i] !== undefined)
+              ? Math.round(data.daily.precipitation_probability_mean[i])
+              : 0;
+            const pMax = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[i] !== undefined)
               ? data.daily.precipitation_probability_max[i]
               : 0;
 
@@ -1141,7 +1216,13 @@
               '<span class="weather-day-name">' + dayLabel + '</span>' +
               '<span class="weather-day-icon">' + details.icon + '</span>' +
               '<span class="weather-day-desc">' + details.text + '</span>' +
-              '<span class="weather-day-rain" title="Rain probability">💧' + rainProb + '%</span>' +
+              '<span class="weather-day-rain" title="Precipitation Probability (Min / Mean / Max)">' +
+                '<span class="p-min" title="Min">' + pMin + '%</span>' +
+                '<span class="p-slash">/</span>' +
+                '<span class="p-mean" title="Mean">' + pMean + '%</span>' +
+                '<span class="p-slash">/</span>' +
+                '<span class="p-max" title="Max">' + pMax + '%</span>' +
+              '</span>' +
               '<span class="weather-day-temp">' +
                 '<span class="temp-max">' + maxT + '°</span>' +
                 '<span class="temp-sep">/</span>' +
