@@ -15,7 +15,7 @@ Vibe coded startpage
 <img width="1913" height="918" alt="image" src="https://github.com/user-attachments/assets/f8519ecd-e6a3-4a4c-a588-8531d2f0d329" />
 
 # Qwen Response
-
+```md
 Build a personal browser startpage as a single self-contained HTML file (inline CSS and JS, no external frameworks or libraries). The page must be fully functional when opened directly in a browser.
 
 ## COLOR PALETTE (strict)
@@ -88,9 +88,9 @@ background: radial-gradient(ellipse at center, #1a0505 0%, #0a0a0a 70%);
 
 ## OUTPUT
 Return ONLY the complete HTML file. No explanations, no markdown wrappers around the code — just the raw <!DOCTYPE html> document ready to save as index.html and open in a browser.
-
+```
 # Initial Gemini prompt
-
+```md
 Build a personal browser startpage as a single self-contained HTML file (inline CSS and JS, no external frameworks or libraries). The page must be fully functional when opened directly in a browser.
 COLOR PALETTE (strict)
 Background: #0a0a0a (near-black) with optional dark gradient overlay
@@ -147,4 +147,4 @@ Use a dark CSS radial gradient as background (no external image needed):
 background: radial-gradient(ellipse at center, #1a0505 0%, #0a0a0a 70%);
 OUTPUT
 Return ONLY the complete HTML file. No explanations, no markdown wrappers around the code — just the raw <!DOCTYPE html> document ready to save as index.html and open in a browser.
-
+```
