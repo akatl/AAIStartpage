@@ -1,6 +1,10 @@
 {
   "name": "Cel51 Startpage",
   "description": "Personal dark cyberpunk browser startpage with live 24h clock, weather, bookmarks, search, and terminal.",
-  "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

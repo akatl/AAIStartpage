@@ -363,6 +363,7 @@
       grid-area: terminal;
       font-family: "Courier New", Courier, monospace;
       min-height: 140px;
+      cursor: text;
     }
 
     .terminal-body {
@@ -373,8 +374,19 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      gap: 6px;
+      justify-content: flex-start;
+      gap: 5px;
+      overflow-y: auto;
+      max-height: 165px;
+    }
+
+    .terminal-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .terminal-body::-webkit-scrollbar-thumb {
+      background: rgba(204, 0, 0, 0.3);
+      border-radius: 2px;
     }
 
     .terminal-welcome {
@@ -382,11 +394,56 @@
       font-size: 12px;
     }
 
+    .terminal-hint {
+      color: #555555;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .terminal-hint .term-key {
+      color: #cc0000;
+      font-weight: bold;
+    }
+
+    .terminal-history {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .terminal-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 12px;
+    }
+
+    .terminal-entry-cmd {
+      color: #e8e8e8;
+    }
+
+    .terminal-entry-out {
+      font-size: 11px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      color: #aaaaaa;
+      padding-left: 2px;
+    }
+
+    .terminal-entry-out.success {
+      color: #ff3333;
+    }
+
+    .terminal-entry-out.error {
+      color: #ff6b6b;
+    }
+
     .terminal-prompt-line {
       display: flex;
       align-items: center;
       font-size: 12px;
-      word-break: break-all;
+      position: relative;
     }
 
     .terminal-user {
@@ -400,15 +457,37 @@
 
     .terminal-path {
       color: #e8e8e8;
+      margin-right: 4px;
+    }
+
+    .terminal-input-wrap {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      flex: 1;
+    }
+
+    .terminal-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 12px;
+      width: 0;
+      min-width: 0;
+      padding: 0;
+      margin: 0;
+      caret-color: transparent;
     }
 
     .terminal-cursor {
       display: inline-block;
       color: #cc0000;
       animation: cursor-blink 1s steps(1) infinite;
-      margin-left: 2px;
       font-size: 13px;
       line-height: 1;
+      pointer-events: none;
     }
 
     @keyframes cursor-blink {
@@ -694,14 +773,19 @@
     </section>
 
     <!-- 3. MAIN / TERMINAL (top-right) -->
-    <section class="panel panel-terminal">
+    <section class="panel panel-terminal" id="panel-terminal">
       <h2 class="panel-title">MAIN</h2>
-      <div class="terminal-body">
+      <div class="terminal-body" id="terminal-body">
         <div class="terminal-welcome">Welcome Akatl</div>
-        <div class="terminal-prompt-line">
+        <div class="terminal-hint">Type shortcut (e.g. <span class="term-key">ge</span>) or <span class="term-key">help</span></div>
+        <div class="terminal-history" id="terminal-history"></div>
+        <form id="terminal-form" class="terminal-prompt-line">
           <span class="terminal-user">Akatl</span><span class="terminal-host">@homepage</span><span class="terminal-path">:~$</span>
-          <span class="terminal-cursor">█</span>
-        </div>
+          <div class="terminal-input-wrap">
+            <input type="text" id="terminal-input" class="terminal-input" autocomplete="off" spellcheck="false" aria-label="Terminal input" />
+            <span class="terminal-cursor" id="terminal-cursor">█</span>
+          </div>
+        </form>
       </div>
     </section>
 
@@ -1100,6 +1184,133 @@
     initWeather();
     // Refresh weather every 10 minutes (600,000 ms)
     setInterval(initWeather, 600000);
+
+    // 4. Interactive Terminal & Shortcuts Navigation
+    const terminalBody = document.getElementById('terminal-body');
+    const terminalForm = document.getElementById('terminal-form');
+    const terminalInput = document.getElementById('terminal-input');
+    const terminalHistory = document.getElementById('terminal-history');
+
+    // Click anywhere on terminal to focus input
+    terminalBody.addEventListener('click', function () {
+      terminalInput.focus();
+    });
+
+    // Auto-adjust input width so blinking cursor sits right after typed characters
+    terminalInput.addEventListener('input', function () {
+      terminalInput.style.width = terminalInput.value.length + 'ch';
+    });
+
+    // Bookmark Shortcuts Registry
+    const SHORTCUTS = {
+      // Favorites
+      'yt': { name: 'YouTube', url: 'https://youtube.com' },
+      'gm': { name: 'Gmail', url: 'https://mail.google.com' },
+      'pm': { name: 'ProtonMail', url: 'https://mail.proton.me' },
+      'gd': { name: 'Google Drive', url: 'https://drive.google.com' },
+      'gc': { name: 'Google Calendar', url: 'https://calendar.google.com' },
+      'sp': { name: 'Spotify', url: 'https://open.spotify.com' },
+      'rd': { name: 'Reddit', url: 'https://reddit.com' },
+
+      // AI
+      'ge': { name: 'Gemini', url: 'https://gemini.google.com' },
+      'qw': { name: 'Qwen Studio', url: 'https://chat.qwenlm.ai' },
+      'ai': { name: 'Google AI Studio', url: 'https://aistudio.google.com' },
+      'ac': { name: 'Alibaba Cloud', url: 'https://www.alibabacloud.com' },
+      'cg': { name: 'ChatGPT', url: 'https://chatgpt.com' },
+      'cl': { name: 'Claude', url: 'https://claude.ai' },
+
+      // Name Aliases
+      'youtube': { name: 'YouTube', url: 'https://youtube.com' },
+      'gmail': { name: 'Gmail', url: 'https://mail.google.com' },
+      'protonmail': { name: 'ProtonMail', url: 'https://mail.proton.me' },
+      'proton': { name: 'ProtonMail', url: 'https://mail.proton.me' },
+      'drive': { name: 'Google Drive', url: 'https://drive.google.com' },
+      'calendar': { name: 'Google Calendar', url: 'https://calendar.google.com' },
+      'spotify': { name: 'Spotify', url: 'https://open.spotify.com' },
+      'reddit': { name: 'Reddit', url: 'https://reddit.com' },
+      'gemini': { name: 'Gemini', url: 'https://gemini.google.com' },
+      'qwen': { name: 'Qwen Studio', url: 'https://chat.qwenlm.ai' },
+      'google ai studio': { name: 'Google AI Studio', url: 'https://aistudio.google.com' },
+      'aistudio': { name: 'Google AI Studio', url: 'https://aistudio.google.com' },
+      'alibaba': { name: 'Alibaba Cloud', url: 'https://www.alibabacloud.com' },
+      'alibaba cloud': { name: 'Alibaba Cloud', url: 'https://www.alibabacloud.com' },
+      'chatgpt': { name: 'ChatGPT', url: 'https://chatgpt.com' },
+      'claude': { name: 'Claude', url: 'https://claude.ai' }
+    };
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function addTerminalHistory(cmdText, outputHtml, statusClass) {
+      const entry = document.createElement('div');
+      entry.className = 'terminal-entry';
+
+      const cmdLine = document.createElement('div');
+      cmdLine.className = 'terminal-prompt-line';
+      cmdLine.innerHTML = '<span class="terminal-user">Akatl</span><span class="terminal-host">@homepage</span><span class="terminal-path">:~$</span> <span class="terminal-entry-cmd">' + escapeHtml(cmdText) + '</span>';
+      entry.appendChild(cmdLine);
+
+      if (outputHtml) {
+        const outLine = document.createElement('div');
+        outLine.className = 'terminal-entry-out' + (statusClass ? ' ' + statusClass : '');
+        outLine.innerHTML = outputHtml;
+        entry.appendChild(outLine);
+      }
+
+      terminalHistory.appendChild(entry);
+      terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+
+    function navigateToBookmark(url) {
+      if (window.self !== window.top) {
+        window.open(url, '_blank');
+      } else {
+        window.location.href = url;
+      }
+    }
+
+    terminalForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const raw = terminalInput.value.trim();
+      terminalInput.value = '';
+      terminalInput.style.width = '0px';
+
+      if (!raw) return;
+
+      const cmd = raw.toLowerCase();
+
+      if (cmd === 'clear' || cmd === 'cls') {
+        terminalHistory.innerHTML = '';
+        return;
+      }
+
+      if (cmd === 'help') {
+        const helpText = 
+          'AVAILABLE SHORTCUTS:\n' +
+          '  [yt] youtube       [gm] gmail\n' +
+          '  [pm] protonmail    [gd] drive\n' +
+          '  [gc] calendar      [sp] spotify\n' +
+          '  [rd] reddit        [ge] gemini\n' +
+          '  [qw] qwen studio   [ai] google ai\n' +
+          '  [ac] alibaba cloud [cg] chatgpt\n' +
+          '  [cl] claude\n' +
+          'COMMANDS: help, clear';
+        addTerminalHistory(raw, helpText);
+        return;
+      }
+
+      const match = SHORTCUTS[cmd];
+      if (match) {
+        addTerminalHistory(raw, '&gt; Navigating to ' + match.name + ' [' + match.url + ']...', 'success');
+        setTimeout(function () {
+          navigateToBookmark(match.url);
+        }, 120);
+      } else {
+        addTerminalHistory(raw, 'Command not found: ' + escapeHtml(raw) + '. Type &quot;help&quot; or a bookmark shortcut (e.g. &quot;ge&quot;).', 'error');
+      }
+    });
   </script>
 </body>
 </html>
